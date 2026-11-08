@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: devflow-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: devflow
+      POSTGRES_PASSWORD: devflow_password
+      POSTGRES_DB: devflow_crm
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U devflow -d devflow_crm']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: devflow-redis
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.api
+    container_name: devflow-api
+    restart: always
+    environment:
+      PORT: 4000
+      DATABASE_URL: "postgresql://devflow:devflow_password@postgres:5432/devflow_crm?schema=public"
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_ACCESS_SECRET: "devflow_jwt_access_super_secret_key_32chars_min_2026"
+      JWT_REFRESH_SECRET: "devflow_jwt_refresh_super_secret_key_32chars_min_2026"
+      GEMINI_API_KEY: "${GEMINI_API_KEY}"
+    ports:
+      - '4000:4000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.web
+    container_name: devflow-web
+    restart: always
+    environment:
+      NEXT_PUBLIC_API_URL: "http://localhost:4000/api"
+    ports:
+      - '3000:3000'
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+  redis_data:
