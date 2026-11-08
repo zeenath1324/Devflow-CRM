@@ -2,7 +2,7 @@ import express from 'express';
 import http from 'http';
 import cors from 'cors';
 import { Server as SocketIOServer } from 'socket.io';
-import dotenv from 'dotenv';
+import * as dotenv from 'dotenv';
 
 import { authRouter } from './modules/auth/auth.router';
 import { dashboardRouter } from './modules/dashboard/dashboard.router';

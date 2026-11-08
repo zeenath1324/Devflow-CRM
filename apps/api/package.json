@@ -9,10 +9,10 @@
     "test": "echo \"Running API tests...\""
   },
   "dependencies": {
-    "@devflow/database": "*",
-    "@devflow/shared-types": "*",
-    "@devflow/validation": "*",
-    "@google/genai": "^0.1.1",
+    "@devflow/database": "workspace:*",
+    "@devflow/shared-types": "workspace:*",
+    "@devflow/validation": "workspace:*",
+    "@google/genai": "^3.0.0",
     "@prisma/client": "^5.14.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
